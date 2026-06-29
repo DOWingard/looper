@@ -30,7 +30,10 @@ If {{MODE}} is **negotiate**:
 3. Leave the agreed rubric in contract.md.
 
 If {{MODE}} is **grade**:
-1. Exercise the build adversarially — run it, drive its real paths, look for what's broken. Where the target is a runnable app or site, launch it and play it; do not grade from the source alone.
+1. Exercise the build adversarially against its real interface — never grade from source alone. Pick the harness that fits the target:
+   - Web app / site / front-end: drive the running UI with a browser automation tool — prefer Playwright when it is viable in the environment, else whatever browser-driving capability is available. Load it, click the primary flows, check rendered state and console errors.
+   - CLI / library / API: run / import / call the public surface with real inputs, including the awkward ones.
+   - Non-running artifact (system design, schema): review against the contract's checkable assertions.
 2. Score every contract criterion 0–10 with one line of evidence each, calibrated against the references.
 3. Compute fitness: `python scripts/fitness.py score --vector <comma-separated scores>`.
 4. Append one record to {{WORKSPACE}}/state/evals.jsonl (schema in references/state-and-intake.md): scores, category rollups, fitness, note.
