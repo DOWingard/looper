@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "looper-skill"
+version = "0.1.0"
+description = "Self-maintaining generator-evaluator agent-loop orchestration skill"
+requires-python = ">=3.9"
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["scripts"]
