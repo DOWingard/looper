@@ -10,8 +10,8 @@ criteria over uniform mediocrity. The very high convergence target (~0.95) still
 near-perfect scores across essentially every criterion, so the bias only helps early
 loops reward genuine breakthroughs rather than letting a flat result coast.
 
-classify_attractor reads the *history* of fitness values across cycles and names the
-dynamical regime the loop has settled into, so the evaluator and orchestrator decide
+classify_attractor reads the *history* of fitness values across cycles and classifies the
+trajectory the loop has settled into, so the evaluator and orchestrator decide
 continue / restart / stop from a quantitative signal instead of by eye. Its `action`
 is a recommendation, never a command: the deciding agent stays in the loop so the
 system is not over-determined by this heuristic.
@@ -84,22 +84,21 @@ def converged(history, *, target=0.95, band=(0.85, 0.95), eps=0.01, window=3):
 
 def classify_attractor(history, *, target=0.95, band=(0.85, 0.95), eps=0.01,
                        window=3, strange_std=0.15, strange_amp=0.30):
-    """Name the dynamical regime of a fitness history and recommend an action.
+    """Classify the trajectory of a fitness history and recommend an action.
 
     Returns {"label", "action", "evidence"}. Labels, in checked precedence:
-      converged   stop      at/above target, or a settled in-band plateau (a good sink)
-      strange     restart   high-variance, erratic trajectory -- chaotic, off the rails
-      diverging   restart   steady downward trend -- no attractor in reach
-      stuck_low   restart   settled to a fixed point below the band floor (a bad sink)
-      cyclic      restart   bounded oscillation with no net progress (a limit cycle)
+      converged   stop      at/above target, or a settled in-band plateau
+      strange     restart   high-variance, erratic -- off the rails
+      diverging   restart   steady downward trend
+      stuck_low   restart   settled below the band floor and not improving
+      cyclic      restart   bounded oscillation with no net progress
       converging  continue  steady upward trend, not yet at target
       plateau     continue  slow/flat but not yet a settled plateau
       warming_up  continue  too few cycles to classify
 
-    The bad regimes (strange/diverging/stuck_low/cyclic) all recommend restart because
-    the loop's current initialization sits in a topological partition whose attractor
-    will not reach target; the orchestrator must re-initialize to traverse to a better
-    partition rather than burn more cycles here.
+    The bad labels (strange/diverging/stuck_low/cyclic) all recommend restart because this
+    loop's inputs can't reach target; the orchestrator must restart with changed inputs
+    rather than burn more cycles here.
     """
     if not history:
         return {"label": "warming_up", "action": "continue",
@@ -124,7 +123,7 @@ def classify_attractor(history, *, target=0.95, band=(0.85, 0.95), eps=0.01,
     amp = max(w) - min(w)
     sd = statistics.pstdev(w)
 
-    # Strange is tested before diverging: a chaotic trajectory can carry an incidental
+    # Strange is tested before diverging: an erratic trajectory can carry an incidental
     # negative slope, but its defining trait is high variance plus repeated sign flips.
     if sd > strange_std and amp > strange_amp and sc >= 2:
         return {"label": "strange", "action": "restart",

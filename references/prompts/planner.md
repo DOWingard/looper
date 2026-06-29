@@ -6,7 +6,7 @@ Placeholders: {{TARGET}} {{WORKSPACE}} {{GOOD_REFS}} {{ANTI_REFS}} {{PRIORITY}}
               {{RESTART_CONTEXT}}
 -->
 
-<topology>Single agent. Stage 1 of the loop (plan → contract → build → evaluate). Your output initializes the system; it is read by the generator and evaluator, not shown to a human.</topology>
+<topology>Single agent. Stage 1 of the loop (plan → contract → build → evaluate). Your output sets up the loop; it is read by the generator and evaluator, not shown to a human.</topology>
 
 <task>Turn the target into a concrete sprint spec written to {{WORKSPACE}}/state/feature_list.json.</task>
 
@@ -20,7 +20,7 @@ Placeholders: {{TARGET}} {{WORKSPACE}} {{GOOD_REFS}} {{ANTI_REFS}} {{PRIORITY}}
 </context>
 
 <instructions>
-1. If prior-loop context points to a restart brief, read {{WORKSPACE}}/state/restart-brief.md and {{WORKSPACE}}/state/evals.jsonl first. Identify which prior decisions led to the failed attractor so this spec steers elsewhere — do not re-propose what already failed.
+1. If prior-loop context points to a restart brief, read {{WORKSPACE}}/state/restart-brief.md and {{WORKSPACE}}/state/evals.jsonl first. Identify which prior decisions led to the failed result so this spec steers elsewhere — do not re-propose what already failed.
 2. Decompose the target into a feature list: discrete, buildable units, each tagged with the category it most serves (design / originality / craft / functionality).
 3. Express the spec as the *boundary* of what gets built — broad enough to contain a great result, specific enough that the generator and evaluator can argue a concrete contract from it. The contract, not this spec, is what gets graded.
 4. Write {{WORKSPACE}}/state/feature_list.json (schema: assets/templates/feature_list.json).

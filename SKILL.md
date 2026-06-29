@@ -5,8 +5,8 @@ description: >
   target (app, front-end, website, system design) to a quantitative fitness target. A single
   orchestrator drives four disjoint roles — planner, generator, evaluator, and itself —
   grading results 0–10 across design/originality/craft/functionality, maximizing the L2/RMS
-  fitness of the metric vector, and deciding continue/restart/stop by classifying the run as
-  a dynamical system (converged/cyclic/diverging/strange/stuck_low). Use whenever the user
+  fitness of the metric vector, and deciding continue/restart/stop by classifying its fitness
+  trajectory (converged/cyclic/diverging/strange/stuck_low). Use whenever the user
   invokes /looper, or wants to autonomously build-and-iterate / self-optimize / "loop on" a
   software target until it converges to a quality bar — even if they just describe the target
   and a standard of "good" and ask to iterate to it. The orchestrator runs the loop; it never
@@ -32,7 +32,7 @@ so it converges and so it can crash and resume from disk.
 | **Generator** | builds everything; proposes "done" | grades its own work |
 | **Evaluator** | grades 0–10, logs the vector + fitness, classifies the trajectory, signals restart | writes target code |
 
-Full role contract and the dynamical-systems reasoning behind it: `references/manifold-and-roles.md`.
+Full role contract and restart logic: `references/roles-and-restart.md`.
 
 ## 0 — Intake (before the first loop)
 
@@ -78,39 +78,39 @@ criteria + logs) plus its **cycles**. A cycle is one build→grade→classify it
 ## 3 — The orchestrator decision
 
 After each grade, choose **continue / restart / stop**. Combine the evaluator's *local* signal
-(this loop's trajectory) with your *global* view (every loop's history — the full manifold).
+(this loop's trajectory) with your *global* view (every loop's history).
 
 - **STOP (success)** when `fitness.py classify` returns `converged` — latest ≥ target, or a
   settled in-band plateau. Finalize and report.
 - **CONTINUE** the same loop when the trajectory is `converging` or `plateau` and still has
   headroom. Run another cycle.
 - **RESTART** the loop when the trajectory is `cyclic`, `diverging`, `strange`, or `stuck_low`
-  — its initialization sits in a partition whose attractor won't reach target. You may also
-  restart against the evaluator's "continue" if your global view shows the partition's ceiling
-  is below target (e.g. converging but asymptoting toward 0.8).
+  — it won't reach target and more cycles won't change that. You may also restart against the
+  evaluator's "continue" if your cross-loop view shows the loop's ceiling is below target
+  (e.g. converging but asymptoting toward 0.8).
 
-The evaluator signals from one section of the manifold; **you** decide from all of it. A
-single low ceiling is a local restart (enrich logs, maybe renegotiate criteria); three
-initializations all capping low is a partition-family problem calling for a larger re-init.
-Mapping of regime → action and the topological reasoning: `references/manifold-and-roles.md`.
+The evaluator signals from one loop's curve; **you** decide from every loop's. A single low
+ceiling is a local restart (enrich logs, maybe renegotiate criteria); three initializations
+all capping low means the approach itself is wrong, calling for a larger re-init. Mapping of
+trajectory → action: `references/roles-and-restart.md`.
 
 **Guardrails.**
 - Cap cycles-per-loop and loops-per-session so a pathological run can't spin forever. On
   hitting a cap, stop and surface the trajectory to the human.
 - **Insert a human only when the *contract itself* looks wrong — not when a *build* fails.** A
   failed build is a restart; a wrong rubric is an escalation.
-- **Do not over-determine the subagents.** Over-tightened prompts create a degenerate sink:
-  the system collapses to whatever the prompt forces. Prefer feeding context over adding
+- **Do not over-determine the subagents.** Over-tightened prompts collapse the loop to
+  whatever output the prompt forces, with no room to find a better one. Prefer feeding context over adding
   constraints; make prompt tweaks small and reversible. A role prompt that only grows is the
   signal you are over-determining — back it out.
 
 ## 4 — Restart handoff (so loops don't reconverge)
 
 On restart, write `state/restart-brief.md` (template in `assets/templates/`) and ensure every
-new subagent reads it first. It carries the prior attractor and ceiling, the change→fitness-
+new subagent reads it first. It carries the prior trajectory type and ceiling, the change→fitness-
 pattern map mined from the logs, the result(s) the new loop must NOT reconverge to, and what
-this initialization changes (logs / criteria / small prompt tweaks) and the partition it aims
-for. Without the brief, a restart lands back in the same partition. Increment the `loop`
+this initialization changes (logs / criteria / small prompt tweaks) and the result it aims
+for. Without the brief, a restart reconverges to the same result. Increment the `loop`
 counter; the new planner/generator/evaluator read the brief + `evals.jsonl` as their context.
 
 ## 5 — Tune from the traces, keep the harness small
@@ -129,12 +129,12 @@ prompts. Run grade after build each cycle; run plan once per loop; run negotiate
 
 ## Reference index
 
-- `references/fitness-and-convergence.md` — the fitness formula, convergence + stopping rules, attractor heuristics, and the `fitness.py` CLI.
-- `references/manifold-and-roles.md` — the dynamical-systems view, the four-role contract, restart-signal protocol, restart handoff, over-determination guardrail.
+- `references/fitness-and-convergence.md` — the fitness formula, convergence + stopping rules, trajectory heuristics, and the `fitness.py` CLI.
+- `references/roles-and-restart.md` — the four-role contract, restart-signal protocol, restart handoff, over-determination guardrail.
 - `references/state-and-intake.md` — workspace layout, state-file + `evals.jsonl` schema, intake handshake, sizing, criteria allocation.
 - `references/prompts/{planner,generator,evaluator}.md` — the role system-prompt templates.
 - `scripts/fitness.py` — deterministic fitness + trajectory classifier (compute with this; never by hand). Tests in `scripts/test_fitness.py`.
 
 Lineage: this implements the "write the loop, not the prompt" field-notes pattern —
 generator/evaluator separation, contracts negotiated on disk, file-system state, deletable
-harness — with a quantitative fitness function and a dynamical-systems restart rule on top.
+harness — with a quantitative fitness function and a trajectory-based restart rule on top.

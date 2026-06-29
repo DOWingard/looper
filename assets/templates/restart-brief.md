@@ -1,9 +1,8 @@
 # Restart Brief — {{slug}}
 
 Written by the orchestrator when it restarts the loop. **Every new subagent reads this
-before acting**, so the new loop traverses to a different region of the manifold instead of
-reconverging to the same failure. Without this brief, a restart usually lands back in the
-same partition.
+before acting**, so the new loop heads somewhere different instead of reconverging to the
+same failure. Without this brief, a restart usually reconverges to the same result.
 
 ## Prior loop
 - Loop: {{loop}}   Cycles run: {{cycles}}   Fitness ceiling: {{ceiling}}   Attractor: {{attractor}}
@@ -19,4 +18,4 @@ same partition.
 - **Logs provided:** {{what failure context the new subagents now read}}
 - **Criteria:** {{renegotiation, if any — otherwise "unchanged"}}
 - **Prompt tweaks:** {{small standing-prompt changes, if any — otherwise "none"}}
-- **Intended partition:** {{the better attractor this re-initialization is meant to reach}}
+- **Intended result:** {{the better outcome this restart is meant to reach}}

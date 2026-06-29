@@ -14,8 +14,8 @@ loop a first-class object — separated roles, state on disk, a contract negotia
 code is written — and adds two things on top:
 
 - a **fitness function** that turns "is it good?" into a number, and
-- a **dynamical-systems restart rule** that recognizes when a run is stuck and re-initializes
-  it into a different region of the search space instead of grinding.
+- a **trajectory-based restart rule** that recognizes when a run is stuck and restarts it
+  with changed inputs instead of grinding.
 
 ## The four roles (disjoint)
 
@@ -61,21 +61,21 @@ intake → bootstrap workspace
                                                   continue / restart / stop
 ```
 
-The evaluator computes fitness and classifies the run's trajectory into a **dynamical
-regime**, which drives the restart decision:
+The evaluator computes fitness and classifies the run's fitness **trajectory**, which drives
+the restart decision:
 
-| Regime | Action | Meaning |
+| Trajectory | Action | Meaning |
 |---|---|---|
 | `converged` | stop | at/above target, or a settled in-band plateau |
 | `converging` / `plateau` | continue | still climbing or with headroom |
-| `cyclic` | restart | oscillating with no net progress (limit cycle) |
+| `cyclic` | restart | oscillating with no net progress |
 | `diverging` | restart | trending away from target |
 | `strange` | restart | erratic, off the rails |
-| `stuck_low` | restart | settled to a fixed point below target (a bad sink) |
+| `stuck_low` | restart | settled below target and not improving |
 
 The evaluator signals restart from *one* loop's trajectory; the orchestrator decides from
 *all* loops' history, and on restart writes a brief that tells the next loop what failed and
-what not to reconverge to — so the restart traverses to a genuinely different region rather
+what not to reconverge to — so the restart heads somewhere genuinely different rather
 than repeating itself.
 
 ## Layout
@@ -84,8 +84,8 @@ than repeating itself.
 looper/
 ├── SKILL.md                       orchestrator doctrine (the skill entry point)
 ├── references/
-│   ├── fitness-and-convergence.md fitness formula, convergence/stopping, attractor heuristics
-│   ├── manifold-and-roles.md      dynamical-systems view, role contract, restart protocol
+│   ├── fitness-and-convergence.md fitness formula, convergence/stopping, trajectory heuristics
+│   ├── roles-and-restart.md       role contract, restart-signal protocol, over-determination guard
 │   ├── state-and-intake.md        workspace + state schema, intake handshake, sizing
 │   └── prompts/                   planner / generator / evaluator system-prompt templates
 ├── scripts/
@@ -125,4 +125,4 @@ python scripts/fitness.py classify --evals path/to/evals.jsonl --target 0.95
 
 Implements the "write the loop, not the prompt" field-notes pattern — generator/evaluator
 separation, contracts negotiated on disk, file-system state, a deletable harness — with a
-quantitative fitness function and a dynamical-systems restart rule added on top.
+quantitative fitness function and a trajectory-based restart rule added on top.

@@ -35,7 +35,7 @@ scores `0.775` while `(6,6,6,6,6)` scores `0.600`. Two consequences the design r
   high-fitness convergence still means uniform excellence.
 
 The remaining risk — "spike a few criteria, neglect a whole category" in early loops — is
-blunted by the **per-category criteria floor** (see `manifold-and-roles.md` on allocation):
+blunted by the **per-category criteria floor** (see `state-and-intake.md` on allocation):
 every category keeps enough criteria that ignoring one caps fitness well below target.
 
 ## Convergence (when the result is good enough)
@@ -61,30 +61,30 @@ Collected at intake (see `state-and-intake.md`):
 If the user gives a custom target, pass it through to every `fitness.py classify` call via
 `--target`.
 
-## Attractor classification (the restart signal)
+## Trajectory classification (the restart signal)
 
 `classify_attractor(history)` reads the **sequence of cycle-fitnesses within one loop** and
-names the dynamical regime, returning `{label, action, evidence}`. Precedence and meaning:
+classifies the trajectory, returning `{label, action, evidence}`. Precedence and meaning:
 
-| Label | Action | Regime |
+| Label | Action | Meaning |
 |---|---|---|
-| `converged` | **stop** | at/above target, or a settled in-band plateau — a *good* sink |
-| `strange` | **restart** | high-variance, erratic trajectory — chaotic, off the rails |
-| `diverging` | **restart** | steady downward trend — no reachable attractor |
-| `stuck_low` | **restart** | settled to a fixed point below the band floor — a *bad* sink |
-| `cyclic` | **restart** | bounded oscillation, no net progress — a limit cycle |
+| `converged` | **stop** | at/above target, or a settled in-band plateau |
+| `strange` | **restart** | high-variance, erratic — off the rails |
+| `diverging` | **restart** | steady downward trend |
+| `stuck_low` | **restart** | settled below the band floor and not improving |
+| `cyclic` | **restart** | bounded oscillation, no net progress |
 | `converging` | **continue** | steady upward trend, not yet at target |
 | `plateau` | **continue** | slow/flat but not yet a settled plateau |
 | `warming_up` | **continue** | too few cycles (<2) to classify |
 
 `action` is a **recommendation**, not a command. The evaluator uses it as its local restart
-signal; the orchestrator weighs it against the cross-loop manifold picture before deciding
-(see `manifold-and-roles.md`). This keeps a judgment in the loop so the heuristic does not
-over-determine the system.
+signal; the orchestrator weighs it against the cross-loop history before deciding (see
+`roles-and-restart.md`). This keeps a judgment in the loop so the heuristic does not
+over-determine the loop.
 
-The four "restart" regimes share a diagnosis: the loop's current **initialization** sits in
-a topological partition whose attractor will not reach target. More cycles here are wasted —
-the fix is re-initialization, not persistence.
+The four "restart" labels share a diagnosis: this loop's inputs (spec + criteria + context)
+can't reach target. More cycles here are wasted — the fix is to restart with changed inputs,
+not to persist.
 
 ## Using the module
 
@@ -98,4 +98,4 @@ python scripts/fitness.py classify --evals .looper/<slug>/state/evals.jsonl --ta
 
 `score` emits `{"fitness", "n"}`; `classify` emits `{label, action, evidence, n_cycles,
 latest}`. The evaluator calls `score` after grading each result and writes the fitness into
-`evals.jsonl`; the evaluator and orchestrator call `classify` to read the regime.
+`evals.jsonl`; the evaluator and orchestrator call `classify` to read the trajectory.

@@ -38,7 +38,7 @@ If {{MODE}} is **grade**:
 3. Compute fitness: `python scripts/fitness.py score --vector <comma-separated scores>`.
 4. Append one record to {{WORKSPACE}}/state/evals.jsonl (schema in references/state-and-intake.md): scores, category rollups, fitness, note.
 5. Classify the trajectory: `python scripts/fitness.py classify --evals {{WORKSPACE}}/state/evals.jsonl --target {{TARGET_FITNESS}}`. Write the returned label into the record's `attractor` field.
-6. If the classifier's action is `restart` (cyclic / diverging / strange / stuck_low), signal the orchestrator: this section of the manifold will not reach target. You signal — you do not restart.
+6. If the classifier's action is `restart` (cyclic / diverging / strange / stuck_low), signal the orchestrator: this loop's trajectory will not reach target. You signal — you do not restart.
 7. Write a short paragraph naming the largest gap to target and which criteria carry it.
 </instructions>
 
