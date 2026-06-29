@@ -1,0 +1,22 @@
+{
+  "target": "One-line description of the software being built",
+  "slug": "kebab-case-name",
+  "criteria_count": 40,
+  "priority": ["originality", "functionality", "design", "craft"],
+  "category_allocation": {
+    "originality": 14,
+    "functionality": 11,
+    "design": 9,
+    "craft": 6
+  },
+  "stopping_target_fitness": 0.95,
+  "features": [
+    {
+      "id": "F1",
+      "title": "Short feature title",
+      "category": "functionality",
+      "description": "What this feature does, and the boundary of acceptable implementations.",
+      "notes": "Decisions deliberately left open for the generator to discover."
+    }
+  ]
+}
