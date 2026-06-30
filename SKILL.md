@@ -23,14 +23,22 @@ converge on slop.
 The loop is short: **gather, reason, act, verify, repeat.** Everything below is how to run it
 so it converges and so it can crash and resume from disk.
 
+## Modes — autonomous (default) and `--supervised`
+
+`/looper` runs **autonomously**: it requests human input only when *strictly necessary* (a
+sufficiency-gate failure, an unresolvable reference discrepancy). `/looper --supervised` inserts
+a human gate after every **major step** — the spec is detailed, the contract is written, and each
+iteration (cycle) completes: present the files, take the human's feedback, incorporate it into
+the rest of the process, then continue.
+
 ## The four roles (disjoint)
 
 | Role | Does | Never |
 |---|---|---|
-| **Orchestrator** (you) | decides continue/restart/stop; manages restart handoff; small prompt tweaks | codes; grades; renegotiates the contract |
-| **Planner** | goal → sprint spec | codes; grades |
+| **Orchestrator** (you) | decides continue/restart/stop; manages restart handoff; sharpens the spec on restart (strengthen-only); small prompt tweaks | codes; grades; writes the contract; weakens or rescopes the human's requirements |
+| **Planner** | ingests references → goal → sprint spec, boundaried by the empirical reference analysis | codes; grades |
 | **Generator** | builds everything; proposes "done" | grades its own work |
-| **Evaluator** | grades 0–10, logs the vector + fitness, classifies the trajectory, signals restart | writes target code |
+| **Evaluator** | scores 0–10 as a human judge *using* the software (each score fuses empirical fact + lived experience); audits metric coverage; logs the vector + fitness; classifies the trajectory; signals restart | writes target code |
 
 Full role contract and restart logic: `references/roles-and-restart.md`.
 
@@ -40,20 +48,35 @@ Assemble enough to make convergence *quantitatively possible*. **Pull every answ
 conversation first; ask only for what is genuinely missing.** Collect: the target build; ≥3
 good references and ≥3 anti-references (optionally category-qualified); any custom
 requirements (ask explicitly); category priority/weighting; and the stopping fitness (default
-0.95). If you cannot anchor what a 0 and a 10 look like per category, **request more before
-starting** — a vague rubric converges to nothing. Full protocol, sizing, and criteria
-allocation: `references/state-and-intake.md`.
+0.95).
 
-Then classify the target to set the criteria count (website ~15, small ~27, medium ~40, large
-~65) and allocate them across the four categories by priority (more criteria for higher
-priority → larger effect on fitness; floor of ≥3 each).
+**Then ingest the references empirically — do not skip this.** Actually load and *exercise*
+every good and anti reference with the harness that fits its medium (drive sites/apps in a
+browser and use them, run CLIs, read designs), and extract observed context against all four
+categories — weighted toward a reference's qualified category/hierarchy when one was given.
+Find what is **invariant across all the targets** (and across the anti-targets) and generalize
+it into candidate metrics and spec boundaries, so the contract is anchored on *your* references,
+not on the model's prior of "what good looks like". Persist this to `state/references.md`; it
+feeds the spec. A reference you cannot load is a **sufficiency-gate failure** — surface it,
+never substitute an assumption. Full protocol, sizing, and allocation:
+`references/state-and-intake.md`.
+
+Classify the target to set the criteria count (website ~15, small ~27, medium ~40, large ~65)
+and allocate across the four categories by priority (more criteria for higher priority → larger
+effect on fitness; floor of ≥3 each).
+
+**Pre-loop checkpoint.** Once the spec is drafted from the references, surface any discrepancy
+the ingestion exposed (e.g. every target shares a property the request omits) and let the human
+resolve it, add spec criteria, or set higher-level goals. Autonomous: only when *strictly
+necessary*. `--supervised`: always, before the first loop.
 
 ## 1 — Bootstrap the workspace
 
 Create `.looper/<slug>/` in the working directory with `state/` and `build/`, seeded from
-`assets/templates/`. State lives on disk because context windows rot; any subagent must be
-able to crash and resume by reading `contract.md` + `progress.md` + `log.md`. Layout and the
-`evals.jsonl` schema: `references/state-and-intake.md`.
+`assets/templates/`. The empirical reference analysis lives in `state/references.md` (it
+anchors the spec and the contract). State lives on disk because context windows rot; any
+subagent must be able to crash and resume by reading `contract.md` + `progress.md` + `log.md`.
+Layout and the `evals.jsonl` schema: `references/state-and-intake.md`.
 
 ## 2 — The loop
 
@@ -69,9 +92,10 @@ criteria + logs) plus its **cycles**. A cycle is one build→grade→classify it
    graded.
 3. **Cycle until a decision:**
    - **Build.** Dispatch the generator (`build` mode) → updates `build/` + `progress.md`.
-   - **Grade.** Dispatch the evaluator (`grade` mode). It scores every criterion, computes
-     fitness with `python scripts/fitness.py score`, appends a record to `evals.jsonl`,
-     classifies with `python scripts/fitness.py classify`, and returns
+   - **Grade.** Dispatch the evaluator (`grade` mode). Experiencing the software as a human
+     judge would, it scores every criterion 0–10 (each score fusing empirical fact and lived
+     experience), computes fitness with `python scripts/fitness.py score`, appends a record to
+     `evals.jsonl`, classifies with `python scripts/fitness.py classify`, and returns
      `{fitness, attractor, signal, gap_paragraph}`.
    - **Decide** (next section).
 
@@ -87,7 +111,12 @@ After each grade, choose **continue / restart / stop**. Combine the evaluator's 
 - **RESTART** the loop when the trajectory is `cyclic`, `diverging`, `strange`, or `stuck_low`
   — it won't reach target and more cycles won't change that. You may also restart against the
   evaluator's "continue" if your cross-loop view shows the loop's ceiling is below target
-  (e.g. converging but asymptoting toward 0.8).
+  (e.g. converging but asymptoting toward 0.8). A restart changes the inputs: the smallest is
+  enriched logs; the largest is **reopening the whole process — sharpening the spec,
+  renegotiating the contract, and starting fresh loops** to resolve the surfaced issue. Any
+  spec edit must **strictly sharpen the human's exact requirements — strengthen, never change
+  or rescope them.** Retain every prior loop's results so you can compare across loops toward
+  the best possible instance.
 
 The evaluator signals from one loop's curve; **you** decide from every loop's. A single low
 ceiling is a local restart (enrich logs, maybe renegotiate criteria); three initializations

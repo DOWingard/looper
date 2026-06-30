@@ -12,6 +12,7 @@ Placeholders: {{TARGET}} {{WORKSPACE}} {{GOOD_REFS}} {{ANTI_REFS}} {{PRIORITY}}
 
 <context>
 - Target build: {{TARGET}}
+- Empirical reference analysis (READ FIRST — the observed properties + invariants of the good/anti references): {{WORKSPACE}}/state/references.md
 - Good references (resemble these): {{GOOD_REFS}}
 - Anti-references (avoid these): {{ANTI_REFS}}
 - Category priority (plan the high-priority ones in most depth): {{PRIORITY}}
@@ -20,12 +21,13 @@ Placeholders: {{TARGET}} {{WORKSPACE}} {{GOOD_REFS}} {{ANTI_REFS}} {{PRIORITY}}
 </context>
 
 <instructions>
-1. If prior-loop context points to a restart brief, read {{WORKSPACE}}/state/restart-brief.md and {{WORKSPACE}}/state/evals.jsonl first. Identify which prior decisions led to the failed result so this spec steers elsewhere — do not re-propose what already failed.
-2. Decompose the target into a feature list: discrete, buildable units, each tagged with the category it most serves (design / originality / craft / functionality).
-3. Express the spec as the *boundary* of what gets built — broad enough to contain a great result, specific enough that the generator and evaluator can argue a concrete contract from it. The contract, not this spec, is what gets graded.
-4. Write {{WORKSPACE}}/state/feature_list.json (schema: assets/templates/feature_list.json).
-5. Append a one-line entry to {{WORKSPACE}}/state/log.md: `## [YYYY-MM-DD] plan | <short title>`.
-6. Do not write target code and do not grade. A planner that codes or grades collapses the role separation the loop depends on — it starts optimizing its own spec instead of the result.
+1. Read {{WORKSPACE}}/state/references.md first: the invariants shared across the good references are **spec boundaries the build must satisfy** (a medium, an interaction model, a level of craft they all share), and the anti-reference invariants are boundaries it must avoid. The spec must not silently drop a property every target shares.
+2. If prior-loop context points to a restart brief, read {{WORKSPACE}}/state/restart-brief.md and {{WORKSPACE}}/state/evals.jsonl first. Identify which prior decisions led to the failed result so this spec steers elsewhere — do not re-propose what already failed. If the brief calls for spec sharpening, **strengthen the human's exact requirements — make the implied constraint explicit and binding — never change, weaken, or rescope what was asked.**
+3. Decompose the target into a feature list: discrete, buildable units, each tagged with the category it most serves (design / originality / craft / functionality), with the reference invariants encoded as boundaries.
+4. Express the spec as the *boundary* of what gets built — broad enough to contain a great result, specific enough that the generator and evaluator can argue a concrete contract from it. The contract, not this spec, is what gets graded.
+5. Write {{WORKSPACE}}/state/feature_list.json (schema: assets/templates/feature_list.json).
+6. Append a one-line entry to {{WORKSPACE}}/state/log.md: `## [YYYY-MM-DD] plan | <short title>`.
+7. Do not write target code and do not grade. A planner that codes or grades collapses the role separation the loop depends on — it starts optimizing its own spec instead of the result.
 </instructions>
 
 <output_format>

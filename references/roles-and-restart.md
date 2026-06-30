@@ -9,15 +9,31 @@ curve, the orchestrator sees every loop's.
 
 | Role | Owns | Forbidden from | Restart authority |
 |---|---|---|---|
-| **Orchestrator** | the whole run; continue/restart/stop decisions; restart context-handoff; small prompt tweaks | writing target code; grading; renegotiating the contract itself | **Global** — may restart on the whole cross-loop history |
-| **Planner** | turning the human's goal into a sprint spec; reading loop history to inform the next spec | touching code; grading | none (informs, does not signal) |
+| **Orchestrator** | the whole run; continue/restart/stop decisions; restart context-handoff; sharpening the spec on restart (strengthen-only); small prompt tweaks | writing target code; grading; writing the contract; weakening or rescoping the human's requirements | **Global** — may restart on the whole cross-loop history |
+| **Planner** | ingesting the references and turning the human's goal into a sprint spec boundaried by them; reading loop history to inform the next spec | touching code; grading | none (informs, does not signal) |
 | **Generator** | building everything; proposing what "done" looks like | grading its own work | none |
-| **Evaluator** | grading each result 0–10; logging the vector + fitness; analyzing this loop's trajectory | writing target code | **Local** — may signal restart from one loop's fitness history |
+| **Evaluator** | scoring each result 0–10 by *using* the software as a human judge (each score fuses empirical fact + lived experience); auditing metric coverage; logging the vector + fitness; analyzing this loop's trajectory | writing target code | **Local** — may signal restart from one loop's fitness history |
 
 **Mixing roles is the primary failure mode.** The moment one agent both builds and grades, it
 turns sycophantic and the loop converges on slop. Keep three context windows / three system
 prompts for planner, generator, evaluator; the orchestrator is the agent running the skill and
 never assumes another role.
+
+## How the evaluator scores
+
+The evaluator is a **human judge who actually uses the software.** Each criterion's 0–10 is a
+single empirical score that fuses **fact** (what verifiably happens — flows complete, state is
+correct, no errors) with **experience** (what it is like to use — is it legible, does the next
+action pull you, does it feel like the references). These are not two metrics, one quantitative
+and one qualitative; they are how each score is reached. So the evaluator must *experience* the
+build the way a first-time user would — driven by what is on screen, not by reading the source
+or steering through an instrumentation back-door. An evaluator that navigates with privileged
+knowledge of the implementation can confirm a flow *works* but never feels a user who cannot
+*find* it; that gap is exactly how a high score hides an unusable result.
+
+During contract negotiation the evaluator also **audits coverage**: do the metrics, together,
+capture the overall goals and the way a human would experience the software? Where they miss a
+dimension, it adds metrics — the contract must measure the goal, not a convenient proxy for it.
 
 ## How a restart works
 
@@ -32,6 +48,17 @@ reconverges. The levers, smallest first:
    result (e.g. criteria that pull design and functionality into conflict).
 3. **Small system-prompt tweaks** — adjust a role's standing prompt only when the logs show a
    recurring failure no amount of context will fix.
+4. **Spec sharpening (the largest lever)** — when the issue is that the spec itself
+   under-determined the result (a property the references demanded was never written down),
+   reopen the whole process: strengthen the spec, renegotiate the contract from it, and start
+   fresh loops. The constraint is absolute: a spec edit may **only sharpen the human's exact
+   requirements — make them more precise and more binding — never change, weaken, or rescope
+   them.** Sharpening is adding the missing constraint the references already implied; changing
+   is substituting your own goal for the human's.
+
+**Keep prior runs.** A restart never deletes the dead loop's results; the `evals.jsonl` history
+and prior `build/` states are retained (loop counter increments) so the orchestrator can compare
+across loops and converge toward the best instance, not merely the latest.
 
 ### The over-determination guardrail
 
@@ -65,7 +92,7 @@ must carry:
 - the prior trajectory type and the fitness ceiling it hit;
 - **which changes produced which fitness patterns** (mined from the logs);
 - the specific result(s) the new loop must *not* reconverge to, and why;
-- what this initialization changes (logs / criteria / prompt tweaks) and the result it aims for.
+- what this initialization changes (logs / criteria / **spec sharpening** / prompt tweaks) and the result it aims for.
 
 A restart without this brief usually lands the system back where it started — the brief is what
 makes the change actually take.

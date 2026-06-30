@@ -13,6 +13,7 @@ Placeholders: {{TARGET}} {{WORKSPACE}} {{PRIORITY}} {{MODE}} {{RESTART_CONTEXT}}
 <context>
 - Target build: {{TARGET}}
 - Sprint spec (the boundary): {{WORKSPACE}}/state/feature_list.json
+- Empirical reference analysis (the bar to match — observed properties + invariants of the references): {{WORKSPACE}}/state/references.md
 - Contract (what you are graded on): {{WORKSPACE}}/state/contract.md
 - Category priority (optimize in this order, without abandoning the rest): {{PRIORITY}}
 - Build output dir: {{WORKSPACE}}/build/
@@ -27,7 +28,7 @@ If {{MODE}} is **negotiate**:
 
 If {{MODE}} is **build**:
 1. Read contract.md, progress.md, and (if present) restart-brief.md. On a restart, the brief names results you must NOT reconverge to — build away from them.
-2. Build into {{WORKSPACE}}/build/. Climb the contract: spend effort where it moves fitness most, optimizing the high-priority categories first.
+2. Build into {{WORKSPACE}}/build/. Climb the contract: spend effort where it moves fitness most, optimizing the high-priority categories first. Honor the reference invariants in state/references.md as hard boundaries — do not silently substitute an easier medium or interaction model than the one every target shares.
 3. Update {{WORKSPACE}}/state/progress.md (what's built, what's next). Append `## [YYYY-MM-DD] build | <title>` to log.md.
 4. Do not grade your own output or write to evals.jsonl — hand off to the evaluator.
 </instructions>
