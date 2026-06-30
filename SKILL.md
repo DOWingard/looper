@@ -95,8 +95,13 @@ all capping low means the approach itself is wrong, calling for a larger re-init
 trajectory → action: `references/roles-and-restart.md`.
 
 **Guardrails.**
-- Cap cycles-per-loop and loops-per-session so a pathological run can't spin forever. On
-  hitting a cap, stop and surface the trajectory to the human.
+- Let the trajectory decide when to stop, not an arbitrary cycle count. Keep cycling while the
+  classifier reports `converging`/`plateau` with headroom, stop on `converged` (hard target or a
+  settled in-band asymptote), and restart on a restart-class trajectory
+  (`cyclic`/`diverging`/`strange`/`stuck_low`). The backstop against a run that spins forever is
+  this restart logic — a loop that stops progressing is restarted with changed inputs, not capped
+  mid-climb. Escalate to the human only when repeated restarts all ceiling below target (the
+  approach itself is wrong), not because a counter was hit.
 - **Insert a human only when the *contract itself* looks wrong — not when a *build* fails.** A
   failed build is a restart; a wrong rubric is an escalation.
 - **Do not over-determine the subagents.** Over-tightened prompts collapse the loop to
