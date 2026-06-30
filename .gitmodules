@@ -1,3 +1,6 @@
 [submodule "demonstration"]
 	path = demonstration
 	url = /home/null/Desktop/work/looper-demonstration.git
+[submodule "demonstration2"]
+	path = demonstration2
+	url = /home/null/Desktop/work/looper-demonstration2.git
