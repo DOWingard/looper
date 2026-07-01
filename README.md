@@ -94,17 +94,46 @@ looper/
 └── assets/templates/              fill-in state files (contract, feature_list, log, evals, …)
 ```
 
-## Install
-
-The repository *is* the skill. Make it available as `/looper` by linking it into your skills
-directory:
+## Get it
 
 ```bash
-ln -s "$(pwd)" ~/.claude/skills/looper
+# just the skill:
+git clone https://github.com/DOWingard/looper.git
+
+# …or with the recorded demonstration run (the optional submodule) included:
+git clone --recurse-submodules https://github.com/DOWingard/looper.git
 ```
 
-Then invoke `/looper` and describe what to build. Paths inside `SKILL.md` (e.g.
-`scripts/fitness.py`) are relative to the skill directory, so the link is all that's needed.
+Already cloned without it and want the demonstration later:
+
+```bash
+git submodule update --init demonstration
+```
+
+## Install as a Claude Code skill
+
+The repository *is* the skill (`SKILL.md` lives at its root). Make it available as `/looper` by
+linking — or copying — it into your Claude Code skills directory:
+
+```bash
+ln -s "$(pwd)" ~/.claude/skills/looper      # run from inside the cloned repo
+# or copy it:  cp -r . ~/.claude/skills/looper
+```
+
+Personal skills live in `~/.claude/skills/<name>/`; a symlink keeps `/looper` in sync with the
+repo. Paths inside `SKILL.md` (e.g. `scripts/fitness.py`) are relative to the skill directory,
+so linking the repo root is all that's needed. Then invoke `/looper` in Claude Code and
+describe what to build — the target, ≥3 good references, ≥3 anti-references, a category
+priority, and a stopping fitness; the orchestrator runs the rest.
+
+## The demonstration
+
+A complete, recorded run of `/looper` lives in the optional **`demonstration`** submodule
+(hosted separately at `DOWingard/looper-demonstration`). It captures the loop's on-disk memory —
+the empirical reference analysis, the planner's spec, the negotiated contract, the per-cycle
+eval history, and the append-only log — alongside the software the loop actually produced: a
+worked example of the loop converging to its fitness bar. A plain `git clone` omits it; fetch it
+with `--recurse-submodules` (above) or `git submodule update --init demonstration`.
 
 ## Develop
 
